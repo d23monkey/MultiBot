@@ -1,7 +1,9 @@
 ## Interface: 30300
 ## Version: 2.0.0
 ## Title: MultiBot
+## Title-zhCN: |r|cFF0099FF[PBot]|R机器人指挥中心
 ## Notes: User Interface for Playerbot
+## Notes-zhCN: PlayerBots的玩家控制中心
 ## Author: Nico Löbbert
 ## SavedVariablesPerCharacter: MultiBotSave
 
