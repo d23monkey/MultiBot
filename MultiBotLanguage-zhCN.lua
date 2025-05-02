@@ -231,6 +231,9 @@ MultiBot.tips.move.reward =
 MultiBot.tips.move.talent =
 "右键点击并拖动以移动天赋";
 
+MultiBot.tips.move.raidus =
+"右键单击以拖动并移动团队编排器";
+
 -- 坦克 --
 
 MultiBot.tips.tanker.master = 
@@ -858,6 +861,12 @@ MultiBot.tips.main.rtsc =
 "RTSC 开关\n|cffffffff"..
 "此开关用于启用或禁用 RTSC 控制。|r\n\n"..
 "|cffff0000左键单击以启用或禁用 RTSC 控制|r\n"..
+"|cff999999(执行命令: 系统)|r";
+
+MultiBot.tips.main.raidus =
+"团队编排器开关\n|cffffffff"..
+"此开关可打开或关闭团队编排器。|r\n\n"..
+"|cffff0000左键单击可打开或关闭团队编排器|r\n"..
 "|cff999999(执行命令: 系统)|r";
 
 MultiBot.tips.main.creator =

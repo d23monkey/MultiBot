@@ -19,19 +19,20 @@ MultiBot:SetScript("OnUpdate", function(pSelf, pElapsed)
 	if(MultiBot.auto.invite and MultiBot.timer.invite.elapsed >= MultiBot.timer.invite.interval) then
 		local tTable = MultiBot.index[MultiBot.timer.invite.roster]
 		
-		if(MultiBot.isMember(tTable[MultiBot.timer.invite.index]) == false) then
-			SendChatMessage(MultiBot.doReplace(MultiBot.info.inviting, "NAME", tTable[MultiBot.timer.invite.index]), "SAY")
-			SendChatMessage(".playerbot bot add " .. tTable[MultiBot.timer.invite.index], "SAY")
-			MultiBot.timer.invite.needs = MultiBot.timer.invite.needs - 1
-		end
-		
-		if(MultiBot.timer.invite.needs == 0 or MultiBot.timer.invite.index  == table.getn(tTable)) then
+		if(MultiBot.timer.invite.needs == 0 or MultiBot.timer.invite.index > table.getn(tTable)) then
+			if(MultiBot.timer.invite.roster == "raidus") then MultiBot.raidus.doRaidSort() end
 			MultiBot.timer.invite.elapsed = 0
 			MultiBot.timer.invite.roster = ""
 			MultiBot.timer.invite.index = 1
 			MultiBot.timer.invite.needs = 0
 			MultiBot.auto.invite = false
 			return
+		end
+		
+		if(MultiBot.isMember(tTable[MultiBot.timer.invite.index]) == false) then
+			SendChatMessage(MultiBot.doReplace(MultiBot.info.inviting, "NAME", tTable[MultiBot.timer.invite.index]), "SAY")
+			SendChatMessage(".playerbot bot add " .. tTable[MultiBot.timer.invite.index], "SAY")
+			MultiBot.timer.invite.needs = MultiBot.timer.invite.needs - 1
 		end
 		
 		MultiBot.timer.invite.index = MultiBot.timer.invite.index + 1
@@ -312,6 +313,7 @@ MultiBot:SetScript("OnEvent", function()
 		if(MultiBot.isInside(arg1, "Accountlevel", "account level", "niveau de compte", "等级")) then
 			local tLevel = tonumber(MultiBot.doSplit(arg1, ": ")[2])
 			if(tLevel ~= nil) then MultiBot.GM = tLevel > 1 end
+			MultiBot.RaidPool("player")
 		end
 		
 		if(MultiBot.isInside(arg1, "Possible strategies")) then
@@ -674,9 +676,15 @@ MultiBot:SetScript("OnEvent", function()
 			return
 		end
 		
+		if(tButton.waitFor == "DETAIL" and MultiBot.isInside(arg1, "playing with")) then
+			tButton.waitFor = ""
+			MultiBot.RaidPool(arg2, arg1)
+			return
+		end
+		
 		if(tButton.waitFor == "IGNORE" and MultiBot.isInside(arg1, "Ignored ")) then
 			if(MultiBot.spells[arg2] == nil) then MultiBot.spells[arg2] = {} end
-			tButton.waitFor = ""
+			tButton.waitFor = "DETAIL"
 			
 			local tSpells = {}
 			local tIgnores = MultiBot.doSplit(arg1, ": ")[2]
@@ -690,6 +698,7 @@ MultiBot:SetScript("OnEvent", function()
 				end
 			end
 			
+			SendChatMessage("who", "WHISPER", nil, arg2)
 			return
 		end
 		

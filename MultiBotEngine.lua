@@ -1,3 +1,32 @@
+MultiBot.CLEAR = function(pString, pAmount, o1, o2, o3)
+	for i = 1, pAmount, 1 do
+		if(o1 == nil) then
+			pString = MultiBot.doReplace(pString, "|cff%w%w%w%w%w%w", "")
+			pString = MultiBot.doReplace(pString, "|h", "")
+			pString = MultiBot.doReplace(pString, "|r", "")
+		else
+			if(o1 ~= nil) then pString = MultiBot.doReplace(pString, o1, "") end
+			if(o2 ~= nil) then pString = MultiBot.doReplace(pString, o1, "") end
+			if(o3 ~= nil) then pString = MultiBot.doReplace(pString, o1, "") end
+		end
+	end
+	
+	return pString
+end
+
+MultiBot.CASE = function(pCondition, pDefault, oCase1, oCase2, oCase3, oCase4, oCase5, oCase6, oCase7, oCase8, oCase9)
+	if(pCondition == 1 and oCase1 ~= nil) then return oCase1 end
+	if(pCondition == 2 and oCase2 ~= nil) then return oCase2 end
+	if(pCondition == 3 and oCase3 ~= nil) then return oCase3 end
+	if(pCondition == 4 and oCase4 ~= nil) then return oCase4 end
+	if(pCondition == 5 and oCase5 ~= nil) then return oCase5 end
+	if(pCondition == 6 and oCase6 ~= nil) then return oCase6 end
+	if(pCondition == 7 and oCase7 ~= nil) then return oCase7 end
+	if(pCondition == 8 and oCase8 ~= nil) then return oCase8 end
+	if(pCondition == 9 and oCase9 ~= nil) then return oCase9 end
+	return pDefault
+end
+
 MultiBot.IF = function(pCondition, pSuccess, pFailure)
 	if(pCondition) then return pSuccess else return pFailure end
 end
@@ -53,7 +82,8 @@ MultiBot.doSplit = function(pString, pPattern)
 end
 
 MultiBot.doReplace = function(pString, pSearch, pReplace)
-	local tFrom, tTo = string.find(pString, pSearch) 
+	local tFrom, tTo = string.find(pString, pSearch)
+	if(tFrom == nil or tTo == nil) then return pString end
 	return string.sub(pString, 1, tFrom - 1) .. pReplace .. string.sub(pString, tTo + 1)
 end
 
@@ -173,6 +203,7 @@ MultiBot.toClass = function(pClass)
 	if(tClass == "sa" or tClass == "sm") then return "Shaman" end
 	if(tClass == "he" or tClass == "wl") then return "Warlock" end
 	if(tClass == "ke" or tClass == "wr") then return "Warrior" end
+	if(pClass == "dk") then return "DeathKnight" end
 	return "Unknown"
 end
 
@@ -218,6 +249,66 @@ MultiBot.toPoint = function(pFrame)
 	local tWidth = tonumber(tResolution[1])
 	local tScale = 1 / tWidth * MultiBot:GetRight()
 	return math.floor(tX - (tWidth * tScale)), math.floor(tY)
+end
+
+MultiBot.RaidPool = function(pUnit, oWho)
+	if(pUnit ~= "player" and MultiBot.getBot(pUnit) == nil) then return end
+	
+	local tGender = MultiBot.CASE(UnitSex(pUnit), "[U]", "[N]", "[M]", "[F]")
+	local tLocalClass, tClass = UnitClass(pUnit)
+	local tLocalRace, tRace = UnitRace(pUnit)
+	local tLevel = UnitLevel(pUnit)
+	local tName = UnitName(pUnit)
+	local tTabs = {}
+	local tScore = ""
+	
+	if(oWho ~= nil) then
+		local tWho = MultiBot.CLEAR(oWho, 20)
+		tWho = MultiBot.doReplace(tWho, "beast bastery", "Beast-Mastery")
+		tWho = MultiBot.doReplace(tWho, "feral combat", "Feral-Combat")
+		tWho = MultiBot.doReplace(tWho, "Blood Elf", "Blood-Elf")
+		tWho = MultiBot.doReplace(tWho, "Night Elf", "Night-Elf")
+		
+		tParts = MultiBot.doSplit(tWho, ", ")
+		tSpace = MultiBot.doSplit(tParts[1], " ")
+		tScore = MultiBot.doSplit(tParts[2], " ")[1]
+		tTabs = MultiBot.doSplit(strsub(tSpace[4], 2, strlen(tSpace[4]) - 1), "/")
+		
+		if(tGender == nil) then tGender = tSpace[2] end
+		if(tClass == nil) then tClass = MultiBot.toClass(tSpace[5]) end
+		if(tRace == nil) then tRace = tSpace[1] end
+		if(tName == nil) then tName = pUnit end
+		if(tLevel == nil) then tLevel = substr(MultiBot.doSplit(tSpace[6], " ")[1], 2) end
+	else
+		tScore = MultiBot.ItemLevel(pUnit)
+		tTabs[1] = GetNumTalents(1)
+		tTabs[2] = GetNumTalents(2)
+		tTabs[3] = GetNumTalents(3)
+	end
+	 
+	local tTabIndex = MultiBot.IF(tTabs[3] > tTabs[2] and tTabs[3] > tTabs[1], 3, MultiBot.IF(tTabs[2] > tTabs[3] and tTabs[2] > tTabs[1], 2, 1))
+	local tSpecial = MultiBot.CLEAR(MultiBot.info.talent[MultiBot.toClass(tClass) .. tTabIndex], 1)
+	
+	if(tLocalClass == nil) then tLocalClass = tClass end
+	if(tLocalRace == nil) then tLocalRace = tRace end
+	
+	MultiBotGlobalSave[tName] =  tLocalRace .. "," .. tGender .. "," .. tSpecial .. "," .. tTabs[1] .. "/" .. tTabs[2] .. "/" .. tTabs[3] .. "," .. tLocalClass .. "," .. tLevel .. "," .. tScore
+end
+
+MultiBot.ItemLevel = function(pUnit)
+	local tCount = 0
+	local tScore = 0
+	
+	for i = 1, 19, 1 do
+		local tItem = GetInventoryItemLink(pUnit, i)
+		if(tItem ~= nil) then
+			local iName, iLink, iRare, iLevel = GetItemInfo(tItem)
+			tScore = tScore + iLevel
+			tCount = tCount + 1
+		end
+	end
+	
+	return floor(tScore / tCount), tCount
 end
 
 MultiBot.SavePortal = function(pButton)
@@ -398,9 +489,9 @@ end
 
 -- MULTIBOT:FRAME --
 
-MultiBot.newFrame = function(pParent, pX, pY, pSize, oWidth, oHeight)
+MultiBot.newFrame = function(pParent, pX, pY, pSize, oWidth, oHeight, oAlign)
 	local frame = CreateFrame("Frame", nil, pParent)
-	frame:SetPoint("BOTTOMRIGHT", pX, pY)
+	frame:SetPoint(MultiBot.IF(oAlign ~= nil, oAlign, "BOTTOMRIGHT"), pX, pY)
 	frame:Show()
 	
 	if(oWidth ~= nil and oHeight ~= nil)
@@ -413,6 +504,9 @@ MultiBot.newFrame = function(pParent, pX, pY, pSize, oWidth, oHeight)
 	frame.texts = {}
 	
 	frame.parent = pParent
+	frame.height = MultiBot.IF(oHeight ~= nil, oHeight, pSize)
+	frame.width = MultiBot.IF(oWidth ~= nil, oWidth, pSize)
+	frame.align = MultiBot.IF(oAlign ~= nil, oAlign, "BOTTOMRIGHT")
 	frame.size = pSize
 	frame.x = pX
 	frame.y = pY
@@ -426,6 +520,16 @@ MultiBot.newFrame = function(pParent, pX, pY, pSize, oWidth, oHeight)
 		frame.texture:SetAllPoints(frame)
 		frame.texture:Show()
 		return frame.texture
+	end
+	
+	frame.addModel = function(pName, pX, pY, pWidth, pHeight, oScale)
+		if(frame.model ~= nil) then frame.model:Hide() end
+		frame.model = CreateFrame("DressUpModel", "MyModel" .. pName, frame)
+		frame.model:SetPoint("CENTER", 0, 64)
+		frame.model:SetSize(160, 240)
+		frame.model:SetUnit(pName)
+		if(oScale ~= nil) then frame.model:SetScale(oScale) end
+		return frame.model
 	end
 	
 	frame.addText = function(pIndex, pText, pAlign, pX, pY, pSize)
@@ -693,21 +797,31 @@ MultiBot.newButton = function(pParent, pX, pY, pSize, pTexture, pTip)
 	-- EVENT --
 	
 	button:SetScript("OnEnter", function()
-		GameTooltip:SetOwner(button, "ANCHOR_TOPRIGHT", 0 - button.size, 2)
-		if(string.sub(button.tip, 1, 1) == "|") then GameTooltip:SetHyperlink(button.tip) else GameTooltip:SetText(button.tip) end
-		GameTooltip:Show()
+		if(type(button.tip) == "string") then
+			GameTooltip:SetOwner(button, "ANCHOR_TOPRIGHT", 0 - button.size, 2)
+			if(string.sub(button.tip, 1, 1) == "|") then GameTooltip:SetHyperlink(button.tip) else GameTooltip:SetText(button.tip) end
+			GameTooltip:Show()
+			return
+		end
+		
+		if(type(button.tip) == "table") then
+			button.tip:Show()
+			return
+		end
 	end)
 	
 	button:SetScript("OnLeave", function()
 		button:SetPoint("BOTTOMRIGHT", button.x, button.y)
 		button:SetSize(button.size, button.size)
-		GameTooltip:Hide()
+		if(type(button.tip) == "string") then GameTooltip:Hide() end
+		if(type(button.tip) == "table") then button.tip:Hide() end
 	end)
 	
 	button:SetScript("PostClick", function(pSelf, pEvent)
 		button:SetPoint("BOTTOMRIGHT", button.x - 1, button.y + 1)
 		button:SetSize(button.size - 2, button.size - 2)
-		GameTooltip:Hide()
+		if(type(button.tip) == "string") then GameTooltip:Hide() end
+		if(type(button.tip) == "table") then button.tip:Hide() end
 		
 		if(pEvent == "RightButton" and button.doRight ~= nil) then button.doRight(button) end
 		if(pEvent == "LeftButton" and button.doLeft ~= nil) then button.doLeft(button) end

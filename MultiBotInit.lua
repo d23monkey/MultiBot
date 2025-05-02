@@ -872,7 +872,17 @@ tMain.addButton("RTSC", 0, 68, "ability_hunter_markedfordeath", MultiBot.tips.ma
 	end
 end
 
-tMain.addButton("Creator", 0, 102, "inv_helmet_145a", MultiBot.tips.main.creator).setDisable()
+tMain.addButton("Raidus", 0, 102, "inv_misc_head_dragon_01", MultiBot.tips.main.raidus).setDisable()
+.doLeft = function(pButton)
+	if(MultiBot.OnOffSwitch(pButton)) then
+		MultiBot.raidus.setRaidus()
+		MultiBot.raidus:Show()
+	else
+		MultiBot.raidus:Hide()
+	end
+end
+
+tMain.addButton("Creator", 0, 136, "inv_helmet_145a", MultiBot.tips.main.creator).setDisable()
 .doLeft = function(pButton)
 	if(MultiBot.OnOffSwitch(pButton)) then
 		MultiBot.doRepos("Tanker", -34)
@@ -903,7 +913,7 @@ tMain.addButton("Creator", 0, 102, "inv_helmet_145a", MultiBot.tips.main.creator
 	end
 end
 
-tMain.addButton("Beast", 0, 136, "ability_mount_swiftredwindrider", MultiBot.tips.main.beast).setDisable()
+tMain.addButton("Beast", 0, 170, "ability_mount_swiftredwindrider", MultiBot.tips.main.beast).setDisable()
 .doLeft = function(pButton)
 	if(MultiBot.OnOffSwitch(pButton)) then
 		MultiBot.doRepos("Tanker", -34)
@@ -967,7 +977,7 @@ tFrame.addButton("None", -60, 0, "Interface\\AddOns\\MultiBot\\Icons\\language_n
 end
 ]]--
 
-tMain.addButton("Expand", 0, 170, "Interface\\AddOns\\MultiBot\\Icons\\command_follow.blp", MultiBot.tips.main.expand).setDisable()
+tMain.addButton("Expand", 0, 204, "Interface\\AddOns\\MultiBot\\Icons\\command_follow.blp", MultiBot.tips.main.expand).setDisable()
 .doLeft = function(pButton)
 	if(MultiBot.OnOffSwitch(pButton)) then
 		MultiBot.doRepos("Tanker", -34)
@@ -988,7 +998,7 @@ tMain.addButton("Expand", 0, 170, "Interface\\AddOns\\MultiBot\\Icons\\command_f
 	end
 end
 
-tMain.addButton("Release", 0, 204, "achievement_bg_xkills_avgraveyard", MultiBot.tips.main.release).setDisable()
+tMain.addButton("Release", 0, 238, "achievement_bg_xkills_avgraveyard", MultiBot.tips.main.release).setDisable()
 .doLeft = function(pButton)
 	if(MultiBot.OnOffSwitch(pButton)) then
 		MultiBot.auto.release = true
@@ -997,7 +1007,7 @@ tMain.addButton("Release", 0, 204, "achievement_bg_xkills_avgraveyard", MultiBot
 	end
 end
 
-tMain.addButton("Stats", 0, 238, "inv_scroll_08", MultiBot.tips.main.stats).setDisable()
+tMain.addButton("Stats", 0, 272, "inv_scroll_08", MultiBot.tips.main.stats).setDisable()
 .doLeft = function(pButton)
 	if(GetNumRaidMembers() > 0) then return SendChatMessage(MultiBot.info.stats, "SAY") end
 	if(MultiBot.OnOffSwitch(pButton)) then
@@ -1011,7 +1021,7 @@ tMain.addButton("Stats", 0, 238, "inv_scroll_08", MultiBot.tips.main.stats).setD
 	end
 end
 
-local tButton = tMain.addButton("Reward", 0, 272, "Interface\\AddOns\\MultiBot\\Icons\\reward.blp", MultiBot.tips.main.reward).setDisable()
+local tButton = tMain.addButton("Reward", 0, 306, "Interface\\AddOns\\MultiBot\\Icons\\reward.blp", MultiBot.tips.main.reward).setDisable()
 tButton.doRight = function(pButton)
 	if(table.getn(MultiBot.reward.rewards) > 0 and table.getn(MultiBot.reward.units) > 0) then MultiBot.reward:Show() end
 end
@@ -1019,12 +1029,12 @@ tButton.doLeft = function(pButton)
 	MultiBot.reward.state = MultiBot.OnOffSwitch(pButton)
 end
 
-tMain.addButton("Reset", 0, 306, "inv_misc_tournaments_symbol_gnome", MultiBot.tips.main.reset)
+tMain.addButton("Reset", 0, 340, "inv_misc_tournaments_symbol_gnome", MultiBot.tips.main.reset)
 .doLeft = function(pButton)
 	MultiBot.ActionToTargetOrGroup("reset botAI")
 end
 
-tMain.addButton("Actions", 0, 340, "inv_helmet_02", MultiBot.tips.main.action)
+tMain.addButton("Actions", 0, 374, "inv_helmet_02", MultiBot.tips.main.action)
 .doLeft = function(pButton)
 	MultiBot.ActionToTargetOrGroup("reset")
 end
@@ -1162,10 +1172,12 @@ local tButton = tRight.addButton("Quests", 0, 0, "inv_misc_book_07", MultiBot.ti
 tButton.doRight = function(pButton)
 	local tEntries, tQuests = GetNumQuestLogEntries()
 	local tFrame = pButton.parent.frames["Quests"]
-	local tIndex = 0
+	local tIndex = 1
 	
 	for key, value in pairs(tFrame.buttons) do value:Hide() end
 	for key, value in pairs(tFrame.texts) do value:Hide() end
+	table.wipe(tFrame.buttons)
+	table.wipe(tFrame.texts)
 	tFrame.buttons = {}
 	tFrame.texts = {}
 	
@@ -1188,12 +1200,12 @@ tButton.doRight = function(pButton)
 		end
 		
 		for i = 1, pButton.parent.limit do
-			if(tFrom <= i and tTo >= i) then
-				pButton.parent.buttons["Quest" .. i]:Show()
-				pButton.parent.texts["Title" .. i]:Show()
-			else
+			if(i < tFrom or i > tTo) then
 				pButton.parent.buttons["Quest" .. i]:Hide()
 				pButton.parent.texts["Title" .. i]:Hide()
+			else
+				pButton.parent.buttons["Quest" .. i]:Show()
+				pButton.parent.texts["Title" .. i]:Show()
 			end
 		end
 		
@@ -1211,7 +1223,7 @@ tButton.doRight = function(pButton)
 			tFrame.limit = tFrame.limit + 1
 			
 			local tAmount = 0
-			local tButton = tFrame.addButton("Quest" .. tFrame.limit, 0, tIndex * 30, "inv_misc_note_01", tLink)
+			local tButton = tFrame.addButton("Quest" .. tFrame.limit, 0, (tIndex - 1) * 30, "inv_misc_note_01", tLink)
 			tButton.link = tLink
 			tButton.id = i
 			
@@ -1242,17 +1254,17 @@ tButton.doRight = function(pButton)
 				end
 			end
 			
-			local tText = tFrame.addText("Title" .. tFrame.limit, "[" .. tAmount .. "] " .. tTitle, "BOTTOMLEFT", 30, tIndex * 30 + 14, 12)
+			local tText = tFrame.addText("Title" .. tFrame.limit, "[" .. tAmount .. "] " .. tTitle, "BOTTOMLEFT", 30, (tIndex - 1) * 30 + 14, 12)
 			
-			tIndex = (tIndex + 1)%10
-			
-			if(tFrame.from <= (tIndex + 1) and tFrame.to >= (tIndex + 1)) then
-				tButton:Show()
-				tText:Show()
-			else
+			if(tIndex < tFrame.from or tIndex > tFrame.to) then
 				tButton:Hide()
 				tText:Hide()
+			else
+				tButton:Show()
+				tText:Show()
 			end
+			
+			tIndex = (tIndex + 1)%10
 		end
 	end
 	
