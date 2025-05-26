@@ -35,6 +35,7 @@ MultiBot.units = {}
 MultiBot.tips = {}
 
 MultiBot.auto = {}
+MultiBot.auto.sort = false
 MultiBot.auto.stats = false
 MultiBot.auto.talent = false
 MultiBot.auto.invite = false
@@ -42,6 +43,9 @@ MultiBot.auto.release = false
 --MultiBot.auto.language = true
 
 MultiBot.timer = {}
+MultiBot.timer.sort = {}
+MultiBot.timer.sort.elapsed = 0
+MultiBot.timer.sort.interval = 1
 MultiBot.timer.stats = {}
 MultiBot.timer.stats.elapsed = 0
 MultiBot.timer.stats.interval = 45
@@ -903,6 +907,17 @@ MultiBot.tips.units.inviteRaid40 =
 "|cffff0000Left-Click to invite Raid-Members|r\n"..
 "|cff999999(Execution-Order: System)|r";
 
+-- UNITS:ALL --
+
+MultiBot.tips.units.alliance = 
+"Alliance\n|cffffffff"..
+"With this Button you can bring all you Group-Members online or offline.\n"..
+"Maybe MultiBot wont be able to react fast enough and will not show all Botbars.\n\n"..
+"|cffff0000Left-Click to bring all Group-Members online|r\n"..
+"|cff999999(Execution-Order: System)|r\n\n"..
+"|cffff0000Right-Click to bring all Group-Members offline|r\n"..
+"|cff999999(Execution-Order: System)|r";
+
 -- MAIN --
 
 MultiBot.tips.main = {}
@@ -1119,6 +1134,12 @@ MultiBot.tips.quests.master =
 "|cff999999(Execution-Order: System)|r\n\n"..
 "|cffff0000Right-Click to refresh the Options|r\n"..
 "|cff999999(Execution-Order: System)|r";
+
+MultiBot.tips.quests.accept =
+"Quest-Accpet\n|cffffffff"..
+"This Button orders Bots to take every Quest of the targeted NPC.\n\n"..
+"|cffff0000Left-Click to take every Quest|r\n"..
+"|cff999999(Execution-Order: Raid, Party)|r";
 
 -- DRINK --
 
@@ -2563,7 +2584,7 @@ MultiBot.tips.every.spellbook =
 MultiBot.tips.every.talent =
 "Talent|cffffffff\n"..
 "It opens or closes the Talents of this Bot.\n"..
-"It opens with a time delay while the system loads the talent values.|r\n\n",
+"It opens with a time delay while the system loads the talent values.|r\n\n"..
 "|cffff0000Left-Click to open or close the Talents|r\n"..
 "|cff999999(Execution-Order: Bot)|r";
 
